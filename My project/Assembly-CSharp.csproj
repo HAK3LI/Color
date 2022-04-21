@@ -36,10 +36,12 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets\GameLogic.cs" />
-     <Compile Include="Assets\UIGradient.cs" />
-     <Compile Include="Assets\Data.cs" />
-     <Compile Include="Assets\UIGradientUtils.cs" />
+     <Compile Include="Assets\Scripts\GameLogic.cs" />
+     <Compile Include="Assets\Scripts\UIGradient.cs" />
+     <Compile Include="Assets\Scripts\Data.cs" />
+     <Compile Include="Assets\Scripts\UIGradientUtils.cs" />
+     <Compile Include="Assets\Scripts\LevelSelect.cs" />
+     <Compile Include="Assets\Scripts\Menu.cs" />
     <Reference Include="UnityEngine">
         <HintPath>E:\Unity Editor\2020.3.32f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
