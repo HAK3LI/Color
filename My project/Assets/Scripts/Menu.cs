@@ -16,6 +16,8 @@ public class Menu : MonoBehaviour
         GameObject levels = GameObject.Find("Levels");
         Button lvlbtn = levels.GetComponent<Button>();
         lvlbtn.onClick.AddListener(GoLevels);
+        GameObject menu = GameObject.Find("Menu");
+        UpdateLevel lvlmem = menu.GetComponent<UpdateLevel>();
     }
 
     // Update is called once per frame

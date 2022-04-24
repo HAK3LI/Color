@@ -9,29 +9,40 @@ public class LevelSelect : MonoBehaviour
 {
 
     public GameObject block;
+    public Sprite fillSprite;
     public GameObject parent;
     private GameObject new_block;
     private string filePath;
     // Start is called before the first frame update
     void TaskOnClick(int levelnum)
     {
-        string readText = File.ReadAllText(filePath + "Level_0_" + levelnum + ".dat");
-        PlayerPrefs.SetString("level", readText);
+        Level gamelvl = new Level("Level_0_"+levelnum+".json");
+        gamelvl.loadGame();
+        PlayerPrefs.SetInt("levelnum", levelnum);
         StartCoroutine(LoadYourAsyncScene());
     }
     void GetFiles()
     {
         DirectoryInfo dir = new DirectoryInfo(filePath);
-        FileInfo[] info = dir.GetFiles("*.dat");
+        FileInfo[] info = dir.GetFiles("*.json");
         int i = 0;
         foreach (FileInfo f in info)
         {
-            Vector3 cord = new Vector3((i % 5 - 2f), (i / 5 + 3) * 0.8f, 0);
+            Vector3 cord = new Vector3((i % 4 - 1.5f)*1.2f, (2.35f - i / 4) * 1.2f, 0);
             new_block = Instantiate(block, cord, Quaternion.identity, parent.transform);
             Text block_text = new_block.GetComponentInChildren<Text>();
             block_text.text = (i + 1).ToString();
-            Button btn = new_block.GetComponent<Button>();
-            Data level = new_block.GetComponent<Data>();
+            Level infolvl = new Level("Level_0_"+i+".json");
+            for (int j = 0; j < 3; j++) {
+                if (infolvl.highscore <= infolvl.target[j] && infolvl.highscore > 0)
+                {
+                    GameObject target = new_block.transform.Find("target"+(2-j)).gameObject;
+                    SpriteRenderer targetsprite = target.GetComponent<SpriteRenderer>();
+                    targetsprite.sprite = fillSprite; 
+                }
+            }
+            Button btn = new_block.GetComponentInChildren<Button>();
+            Data level = new_block.GetComponentInChildren<Data>();
             level.setNumber(i);
             btn.onClick.AddListener(delegate { TaskOnClick(level.getNumber()); }); ;
             i++;
@@ -39,6 +50,8 @@ public class LevelSelect : MonoBehaviour
     }
     void Start()
     {
+        GameObject menu = GameObject.Find("Menu");
+        UpdateLevel lvlmem = menu.GetComponent<UpdateLevel>();
         filePath = Application.dataPath + "/Levels/";
         GetFiles();
     }
