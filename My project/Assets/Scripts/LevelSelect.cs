@@ -16,23 +16,22 @@ public class LevelSelect : MonoBehaviour
     // Start is called before the first frame update
     void TaskOnClick(int levelnum)
     {
-        Level gamelvl = new Level("Level_0_"+levelnum+".json");
+        Level gamelvl = new Level("Level_0_"+levelnum);
         gamelvl.loadGame();
         PlayerPrefs.SetInt("levelnum", levelnum);
         StartCoroutine(LoadYourAsyncScene());
     }
     void GetFiles()
     {
-        DirectoryInfo dir = new DirectoryInfo(filePath);
-        FileInfo[] info = dir.GetFiles("*.json");
+        Object[] dir = Resources.LoadAll("Levels");
         int i = 0;
-        foreach (FileInfo f in info)
+        foreach (Object f in dir)
         {
             Vector3 cord = new Vector3((i % 4 - 1.5f)*1.2f, (2.35f - i / 4) * 1.2f, 0);
             new_block = Instantiate(block, cord, Quaternion.identity, parent.transform);
             Text block_text = new_block.GetComponentInChildren<Text>();
             block_text.text = (i + 1).ToString();
-            Level infolvl = new Level("Level_0_"+i+".json");
+            Level infolvl = new Level("Level_0_"+i);
             for (int j = 0; j < 3; j++) {
                 if (infolvl.highscore <= infolvl.target[j] && infolvl.highscore > 0)
                 {

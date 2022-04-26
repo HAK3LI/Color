@@ -30,15 +30,21 @@ public class Level
     }
     public Level(string name)
     {
-        string filePath = Application.dataPath + "/Levels/"+name;
-        string jsonString = File.ReadAllText(filePath);
+        TextAsset filePath = Resources.Load<TextAsset>("Levels/"+name);
+        string jsonString = filePath.text;
         Level from = JsonUtility.FromJson<Level>(jsonString);
         this.data = from.data;
         this.width = from.width;
         this.height = from.height;
         this.colors = from.colors;
         this.target = from.target;
-        this.highscore = from.highscore;
+        if (PlayerPrefs.HasKey(name))
+        {
+            this.highscore = PlayerPrefs.GetInt(name);
+        } else 
+        {
+            this.highscore = -1;
+        }
     }
     public void loadGame() {
         PlayerPrefs.SetString("level", this.data);
@@ -53,9 +59,8 @@ public class Level
     {
         this.highscore = highscore;
     }
-    public void SaveIntoJson(string name){
-        string level = JsonUtility.ToJson(this, true);
-        System.IO.File.WriteAllText(Application.dataPath + "/Levels/"+name+".json", level);
+    public void SaveHighScore(string name){
+        PlayerPrefs.SetInt(name,this.highscore);
     }
     
 }

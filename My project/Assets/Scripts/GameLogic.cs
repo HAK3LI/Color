@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +15,7 @@ public class GameLogic : MonoBehaviour
 
     public int currentclicks;
     public int clicks = 20;
-    public GameObject block, parent;
+    public GameObject block, parent, retryobj, nextobj;
     private GameObject new_block, new_star;
     public static int width = 10;
     public static int height = 10;
@@ -24,7 +25,20 @@ public class GameLogic : MonoBehaviour
     private int[,] info = new int[width, height];
     // Start is called before the first frame update
     GameObject[] control = new GameObject[4];
-    
+    public void retry() 
+    {
+        StartCoroutine(LoadYourAsyncScene("Scenes/Game"));
+    }
+    public void next() 
+    {
+        int levelnum = PlayerPrefs.GetInt("levelnum");
+        Debug.Log(levelnum);
+        levelnum++;
+        Level gamelvl = new Level("Level_0_"+levelnum);
+        gamelvl.loadGame();
+        PlayerPrefs.SetInt("levelnum", levelnum);
+        StartCoroutine(LoadYourAsyncScene("Scenes/Game"));
+    }
     public void disableControl() {
         foreach (GameObject cntrl in control)
         {
@@ -119,15 +133,16 @@ public class GameLogic : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("dataPath : " + Application.dataPath);
+        Debug.Log("persistentDataPath : " + Application.persistentDataPath);
         text.text = "Кликов осталось:" + clicks;
         GameObject menu = GameObject.Find("Game Field");
         UpdateLevel lvlmem = menu.GetComponent<UpdateLevel>();
-        int i = 0;
         control = GameObject.FindGameObjectsWithTag("control");
         foreach (GameObject cntrl in control)
         {
-            int x = i;
-            i++;
+            Data cntrldt = cntrl.GetComponent<Data>();
+            int x = cntrldt.getNumber();
             Button cntrlbtn = cntrl.GetComponent<Button>();
             cntrlbtn.onClick.AddListener(delegate { ButtonSelected(x); });
         }
@@ -210,17 +225,27 @@ public class GameLogic : MonoBehaviour
             disableControl();
             GameObject fin = GameObject.Find("Game over");
             GameObject fin_text = GameObject.Find("Win text");
+            Button retrybtn = retryobj.GetComponent<Button>();
+            Button nextbtn = nextobj.GetComponent<Button>();
             Animator fin_bg = fin.GetComponent<Animator>();
             Animator fin_text_bg = fin_text.GetComponent<Animator>();
+            Animator retryanim = retryobj.GetComponent<Animator>();
+            Animator nextanim = nextobj.GetComponent<Animator>();
+            retryanim.SetBool("Game over",true);
+            nextanim.SetBool("Game over",true);
             fin_bg.SetBool("Game over", true);
             fin_text_bg.SetBool("Game over", true);
             int levelnum = PlayerPrefs.GetInt("levelnum");
-            Level infolvl = new Level("Level_0_"+levelnum+".json");
-            if (infolvl.highscore > (clicks-currentclicks+1))
+            Level infolvl = new Level("Level_0_"+levelnum);
+            Debug.Log("Highscore:"+infolvl.highscore);
+            if ((infolvl.highscore > (clicks-currentclicks+1)) || (infolvl.highscore == -1))
             {
+                Debug.Log("New highscore,saving...");
                 infolvl.UpdateHighScore(clicks-currentclicks+1);
-                infolvl.SaveIntoJson("Level_0_"+levelnum);
-            }    
+                infolvl.SaveHighScore("Level_0_"+levelnum);
+            }
+            retrybtn.onClick.AddListener(retry);
+            nextbtn.onClick.AddListener(next);    
             for (int i=0;i<3;i++) {
                 StartCoroutine(Win(i));
             }    
@@ -288,5 +313,20 @@ public class GameLogic : MonoBehaviour
             bloomanim.SetTrigger("anim");
             staranim.SetTrigger("anim");
         }          
+    }
+    IEnumerator LoadYourAsyncScene(string Scene)
+    {
+        // The Application loads the Scene in the background as the current Scene runs.
+        // This is particularly good for creating loading screens.
+        // You could also load the Scene by using sceneBuildIndex. In this case Scene2 has
+        // a sceneBuildIndex of 1 as shown in Build Settings.
+
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(Scene);
+
+        // Wait until the asynchronous scene fully loads
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
+        }
     }
 }
